@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import UserButton from "@/modules/authentication/components/user-button";
 import { X, PlusIcon, SearchIcon } from "lucide-react";
 import Image from "next/image";
