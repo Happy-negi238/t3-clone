@@ -1,6 +1,6 @@
 "use client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteChat, getAllChats, getChatById } from "../actions";
+import { createChatWithMessage, deleteChat, getAllChats, getChatById } from "../actions";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/toast";
 
@@ -23,6 +23,7 @@ export const useCreateChat = () => {
   const router = useRouter();
 
   return useMutation({
+    mutationFn: createChatWithMessage,
     onSuccess: (res: any) => {
       if (res.success && res.data) {
         queryClient.invalidateQueries({ queryKey: ["chats"] });
