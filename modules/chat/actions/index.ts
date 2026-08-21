@@ -52,7 +52,7 @@ export async function createChatWithMessage({
 export async function getAllChats() {
   try {
     const user = await currentUser();
-
+    
     if (!user) {
       return { success: false, message: "Unauthorized" };
     }

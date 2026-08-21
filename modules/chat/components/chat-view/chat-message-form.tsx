@@ -6,13 +6,33 @@ import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ModelSelector } from "./model-selector";
+import { useCreateChat } from "../../hooks/use-chats";
+import { toast } from "@/components/ui/toast";
 
 const ChatMessageForm = ({ initialMessage, onMessageChange }) => {
   const { data: models, isPending } = useAIModels();
   const [message, setMessage] = useState("");
   const [selectedModel, setSelectedModel] = useState(models?.models[0].id);
+  const { mutateAsync, isPending: isChatPending } = useCreateChat();
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async (e) => {
+    try{
+      e.preventDefault();
+      await mutateAsync({ content: message, model: selectedModel });
+      toast.add({
+        type: "success",
+        title: "Message sent successfully"
+      })
+    } catch (error) {
+      console.log("Error to sending message", error);
+      toast.add({
+        type: "error",
+        title: "Failed to send message"
+      })
+    } finally {
+      setMessage("")
+    }
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 pb-6">
@@ -63,14 +83,14 @@ const ChatMessageForm = ({ initialMessage, onMessageChange }) => {
                 message.trim() ? "Send message" : "Enter a message to enable"
               }
             >
-              {/* {isChatPending ? (
+              {isChatPending ? (
                 <Spinner />
               ) : (
                 <>
                   <Send className="h-4 w-4" />
                   <span className="sr-only">Send message</span>
                 </>
-              )} */}
+              )}
             </Button>
           </div>
         </div>
