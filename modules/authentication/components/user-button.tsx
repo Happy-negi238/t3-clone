@@ -47,7 +47,7 @@ export default function UserButton({
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/sign-in");
+          router.push("/home");
         },
       },
     });

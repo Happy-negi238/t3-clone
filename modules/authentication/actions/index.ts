@@ -35,7 +35,7 @@ export const requireAuth = async () => {
   });
 
   if (!session) {
-    return redirect("/sign-in");
+    return redirect("/home");
   }
 
   return session;

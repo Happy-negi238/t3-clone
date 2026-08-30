@@ -1,9 +1,8 @@
-import React from "react";
 import { ModeToggle } from "./mode-toggle";
 
 const Header = () => {
   return (
-    <div className="flex h-14 w-full  flex-row justify-end items-center border-b border-border bg-sidebar px-4 py-2">
+    <div className="flex w-full h-12 flex-row justify-end items-center border-b border-border bg-sidebar px-4">
       <ModeToggle />
     </div>
   );
