@@ -9,6 +9,21 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 
+type ModalProps = {
+  children: React.ReactNode;
+  title: string;
+  description?: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit?: () => void | Promise<void>;
+  submitText?: string;
+  cancelText?: string;
+  showFooter?: boolean;
+  submitVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: string;
+  className?: string;
+};
+
 const Modal = ({
   children,
   title,
@@ -22,7 +37,7 @@ const Modal = ({
   submitVariant = "default",
   size,
   className = "",
-}) => {
+}: ModalProps) => {
   const handleSubmit = () => {
     if (onSubmit) {
       onSubmit();
@@ -48,7 +63,8 @@ const Modal = ({
               </Button>
               {onSubmit && (
                 <Button
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  variant={submitVariant}
+                  className={submitVariant === "default" ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}
                   onClick={handleSubmit}
                 >
                   {submitText}

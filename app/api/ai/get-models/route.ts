@@ -1,5 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
+type OpenRouterPricing = {
+  prompt?: string | number | null;
+  completion?: string | number | null;
+};
+
+type OpenRouterModel = {
+  id: string;
+  name?: string;
+  description?: string;
+  context_length?: number;
+  architecture?: Record<string, unknown>;
+  pricing?: OpenRouterPricing | null;
+  top_provider?: Record<string, unknown> | null;
+};
+
+type OpenRouterResponse = {
+  data: OpenRouterModel[];
+};
+
 export async function GET(request: NextRequest) {
   try {
     const response = await fetch("https://openrouter.ai/api/v1/models", {
@@ -17,15 +36,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data = await response.json();
-    const freeModel = data.data.filter((model) => {
-      const promptPrice = parseFloat(model.pricing?.prompt || "0");
-      const completionPrice = parseFloat(model.pricing?.completion || "0");
+    const data = (await response.json()) as OpenRouterResponse;
+    const freeModel = data.data.filter((model: OpenRouterModel) => {
+      const promptPrice = Number(model.pricing?.prompt ?? 0);
+      const completionPrice = Number(model.pricing?.completion ?? 0);
 
       return promptPrice === 0 && completionPrice === 0;
     });
 
-    const formattedModels = freeModel.map((model) => ({
+    const formattedModels = freeModel.map((model: OpenRouterModel) => ({
       id: model.id,
       name: model.name,
       description: model.description,

@@ -4,7 +4,17 @@ import React from "react";
 import { toast } from "./ui/toast";
 import Modal from "@/components/ui/modal";
 
-const DeleteChatModel = ({ isModalOpen, setIsModalOpen, chatId }) => {
+type DeleteChatModelProps = {
+  isModalOpen: boolean;
+  setIsModalOpen: (value: boolean) => void;
+  chatId: string;
+};
+
+const DeleteChatModel = ({
+  isModalOpen,
+  setIsModalOpen,
+  chatId,
+}: DeleteChatModelProps) => {
   const { mutateAsync, isPending } = useDeleteChat(chatId);
 
   const handleDelete = async () => {

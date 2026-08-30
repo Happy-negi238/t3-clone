@@ -18,28 +18,28 @@ const openRouter = createOpenRouter({
 /**
  * Convert DB message to UI format for AI SDK
  */
-function dbMessageToUI(msg) {
-  try {
-    const parts = JSON.parse(msg.content);
-    const textParts = parts.filter((p) => p.type === "text");
+// function dbMessageToUI(msg) {
+//   try {
+//     const parts = JSON.parse(msg.content);
+//     const textParts = parts.filter((p) => p.type === "text");
 
-    if (textParts.length === 0) return null;
+//     if (textParts.length === 0) return null;
 
-    return {
-      id: msg.id,
-      role: msg.messageRole.toLowerCase(),
-      parts: textParts,
-      createdAt: msg.createdAt,
-    };
-  } catch {
-    return {
-      id: msg.id,
-      role: msg.messageRole.toLowerCase(),
-      parts: [{ type: "text", text: msg.content }],
-      createdAt: msg.createdAt,
-    };
-  }
-}
+//     return {
+//       id: msg.id,
+//       role: msg.messageRole.toLowerCase(),
+//       parts: textParts,
+//       createdAt: msg.createdAt,
+//     };
+//   } catch {
+//     return {
+//       id: msg.id,
+//       role: msg.messageRole.toLowerCase(),
+//       parts: [{ type: "text", text: msg.content }],
+//       createdAt: msg.createdAt,
+//     };
+//   }
+// }
 
 const generateMessageId = createIdGenerator({ prefix: "msg", size: 16 });
 

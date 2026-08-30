@@ -224,7 +224,7 @@ const ChatSidebar = ({ user }) => {
       </div>
 
       <DeleteChatModel
-        chatId={selectedChatId}
+        chatId={selectedChatId!}
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
       />
