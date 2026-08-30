@@ -7,7 +7,10 @@ import { toast } from "@/components/ui/toast";
 export const useGetChats = () => {
   return useQuery({
     queryKey: ["chats"],
-    queryFn: getAllChats,
+    queryFn: async () => {
+      const res = await getAllChats();
+      return res.success ? res.data ?? [] : [];
+    },
   });
 };
 
@@ -44,8 +47,7 @@ export const useDeleteChat = (chatId: string) => {
   return useMutation({
     mutationFn: () => deleteChat(chatId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["chats"] });
-      router.push("/");
+      queryClient.invalidateQueries({ queryKey: ["chats"], chatId });
     },
     onError: () => {
       toast.add({ type: "error", description: "Failed to delete chat" });

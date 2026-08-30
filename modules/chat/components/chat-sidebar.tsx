@@ -119,10 +119,8 @@ function ChatGroup({ label, chats, activeChatId, onDelete }) {
   );
 }
 
-const ChatSidebar = ({ user, chats }) => {
-
-  // const {data: chats = [], isPending} = useGetChats();
-  console.log("Chat sidebar 1: ", chats);
+const ChatSidebar = ({ user }) => {
+  const { data: chats = [], isPending } = useGetChats();
 
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
@@ -159,9 +157,9 @@ const ChatSidebar = ({ user, chats }) => {
     setIsModalOpen(true);
   };
 
-  // if (isPending) {
-  //   return <Spinner className="m-auto" />;
-  // }
+  if (isPending) {
+    return <Spinner className="m-auto" />;
+  }
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
