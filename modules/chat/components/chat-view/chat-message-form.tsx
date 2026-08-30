@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAIModels } from "../../hooks/use-ai-models";
 import { Send } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
@@ -14,6 +14,13 @@ const ChatMessageForm = ({ initialMessage, onMessageChange }) => {
   const [message, setMessage] = useState("");
   const [selectedModel, setSelectedModel] = useState(models?.models[0].id);
   const { mutateAsync, isPending: isChatPending } = useCreateChat();
+
+  useEffect(() => {
+    if(initialMessage){
+      setMessage(initialMessage);
+      onMessageChange?.("");
+    }
+  },[initialMessage, onMessageChange])
 
   const handleSubmit = async (e) => {
     try{

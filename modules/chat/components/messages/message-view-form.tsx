@@ -1,6 +1,8 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { useAIModels } from "../../hooks/use-ai-models";
 import { useGetChatById } from "../../hooks/use-chats";
 import { Spinner } from "@/components/ui/spinner";
@@ -8,6 +10,7 @@ import {
   PromptInput,
   PromptInputBody,
   PromptInputFooter,
+  PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
@@ -15,7 +18,6 @@ import {
 import {
   Conversation,
   ConversationContent,
-  ConversationDownload,
   ConversationEmptyState,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
@@ -30,7 +32,7 @@ import {
   ReasoningContent,
   ReasoningTrigger,
 } from "@/components/ai-elements/reasoning";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { toast } from "@/components/ui/toast";
 
 type DBMessage = {
   id: string;
@@ -66,7 +68,13 @@ function parseMessageToUI(msg) {
   }
 }
 
-function MessagePart({ part, messageId, partIndex, role, isStreaming }:{
+function MessagePart({
+  part,
+  messageId,
+  partIndex,
+  role,
+  isStreaming,
+}: {
   part: MessagePartShape;
   messageId: string;
   partIndex: number;
@@ -112,30 +120,7 @@ function MessagePart({ part, messageId, partIndex, role, isStreaming }:{
 }
 
 export const MessageViewWithForm = ({ chatId }: { chatId: string }) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const shouldAutoTrigger = searchParams.get("autoTrigger") === "true";
-  const hasAutoTrigger = useRef(false);
-
-  const [selectedModel, setSelectedModel] = useState(null);
-  const [input, setInput] = useState("");
-
-  const { data: models, isPending: isModelLoading } = useAIModels();
-  const { data, isPending } = useGetChatById(chatId);
-
-  const initialMessages = useMemo(() => {
-    if (!data?.data?.messages) return [];
-
-    return data.data.messages
-      .filter((msg) => msg.content.trim() && msg.id)
-      .map(parseMessageToUI);
-  }, [data]);
-
-  useEffect(() => {
-    if (data?.data?.model && !selectedModel) {
-      setSelectedModel(data.data.model);
-    }
-  }, [data, selectedModel]);
+  const { data: chatData, isPending } = useGetChatById(chatId);
 
   if (isPending) {
     return (
@@ -145,14 +130,145 @@ export const MessageViewWithForm = ({ chatId }: { chatId: string }) => {
     );
   }
 
-  const handleSubmit = () => {};
-  const isStreaming = false;
-  const messages = [...initialMessages];
+  if (!chatData?.success || !chatData?.data) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        Chat not found
+      </div>
+    );
+  }
+
+  const rawMessages = chatData.data.messages ?? [];
+  const initialMessages: UIMessage[] = rawMessages
+    .filter((m) => m?.id && m?.content?.trim())
+    .map(parseMessageToUI);
+
+  return (
+    <ChatView
+      chatId={chatId}
+      initialMessages={initialMessages}
+      initialModel={chatData.data.model}
+    />
+  );
+};
+
+const ChatView = ({
+  chatId,
+  initialMessages,
+  initialModel,
+}: {
+  chatId: string;
+  initialMessages: UIMessage[];
+  initialModel: string | null;
+}) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const shouldAutoTrigger = searchParams.get("autoTrigger") === "true";
+  const hasAutoTriggered = useRef(false);
+
+  const [selectedModel, setSelectedModel] = useState<string | null>(
+    initialModel,
+  );
+  const { data: modelsData, isPending: isModelLoading } = useAIModels();
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+      }),
+    [],
+  );
+
+  const { messages, sendMessage, error, status, stop, regenerate } = useChat({
+    id: chatId,
+    messages: initialMessages,
+    transport,
+    onError: (err) => {
+      console.log("Chat error: ", err);
+      toast.add({
+        type: "error",
+        title: err.message,
+      });
+    },
+  });
+
+  const isBuzy = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    if (!shouldAutoTrigger) return;
+    if (hasAutoTriggered.current) return;
+    if (!selectedModel) return;
+    if (messages.length === 0) return;
+    if (messages.at(-1)?.role !== "user") return;
+
+    hasAutoTriggered.current = true;
+
+    regenerate({
+      body: {
+        chatId,
+        model: selectedModel,
+        skipUserMessage: true,
+      },
+    }).catch((err) => {
+      console.error("Auto-trigger failed:", err);
+      toast.add({
+        type: "error",
+        title: "Failed to generate response",
+      });
+    });
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("autoTrigger");
+    const query = params.toString();
+    router.replace(`/chat/${chatId}${query ? `?${query}` : ""}`, {
+      scroll: false,
+    });
+  }, [
+    shouldAutoTrigger,
+    selectedModel,
+    messages,
+    chatId,
+    regenerate,
+    router,
+    searchParams,
+  ]);
+
+  const handleSubmit = async (message: PromptInputMessage) => {
+    const text = message.text?.trim();
+
+    if (!text) return;
+    if (!selectedModel) {
+      return toast.add({
+        type: "error",
+        title: "Please select the model first",
+      });
+    }
+
+    if (isBuzy) return;
+
+    try {
+      await sendMessage(
+        { text },
+        {
+          body: {
+            chatId,
+            model: selectedModel,
+            skipUserMessage: false,
+          },
+        },
+      );
+    } catch (error) {
+      console.log("Failed to send message: ", error);
+      toast.add({
+        type: "error",
+        title: "Failed to send message",
+      });
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-6 relative size-full h-[calc(100vh-4rem)]">
       <div className="flex flex-col h-full">
-        {/* Message */}
         <Conversation className="h-full">
           <ConversationContent>
             {messages.length === 0 ? (
@@ -170,18 +286,18 @@ export const MessageViewWithForm = ({ chatId }: { chatId: string }) => {
                       messageId={message.id}
                       partIndex={i}
                       role={message.role}
-                      // isStreaming={
-                      //   isBuzy &&
-                      //   message === messages.at(-1) &&
-                      //   i === message.parts.length - 1
-                      // }
+                      isStreaming={
+                        isBuzy &&
+                        message === messages.at(-1) &&
+                        i === message.parts.length - 1
+                      }
                     />
                   ))}
                 </Fragment>
               ))
             )}
 
-            {/* {status === "submitted" && (
+            {status === "submitted" && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Spinner />
                 <span className="text-sm">AI is thinking...</span>
@@ -192,35 +308,34 @@ export const MessageViewWithForm = ({ chatId }: { chatId: string }) => {
               <div className="text-sm text-destructive">
                 {error.message || "Something went wrong."}
               </div>
-            )} */}
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
-        {/* Input */}
-        <PromptInput onSubmit={handleSubmit} className="mt-auto">
+
+        <PromptInput onSubmit={handleSubmit} className="mt-4">
           <PromptInputBody>
             <PromptInputTextarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message.."
-              disabled={false}
+              placeholder="Type your message..."
+              disabled={isBuzy}
             />
           </PromptInputBody>
-          <PromptInputFooter className="">
+
+          <PromptInputFooter>
             <PromptInputTools className="flex items-center justify-between gap-2 w-full">
               <div className="flex-1">
                 {isModelLoading ? (
                   <Spinner />
                 ) : (
                   <ModelSelector
-                    models={models?.models}
+                    models={modelsData?.models ?? []}
                     selectedModelId={selectedModel}
                     onModelSelect={setSelectedModel}
                     className=""
                   />
                 )}
               </div>
-              <PromptInputSubmit status="ready" />
+              <PromptInputSubmit status={status} onStop={stop} />
             </PromptInputTools>
           </PromptInputFooter>
         </PromptInput>

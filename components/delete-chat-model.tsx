@@ -23,21 +23,22 @@ const DeleteChatModel = ({ isModalOpen, setIsModalOpen, chatId }) => {
       console.log("Failed to delete chat", error);
     }
   };
-  return;
-  <Modal
-    title="Delete chat"
-    description="Are you sure you want to delete this Chat? This action cannot be undone."
-    isOpen={isModalOpen}
-    onClose={() => setIsModalOpen(false)}
-    onSubmit={handleDelete}
-    submitText={isPending ? "Deleting.." : "Delete"}
-    submitVariant="destructive"
-  >
-    <p className="text-sm text-zinc-500">
-      Once deleted, all requests and data in this Chat will be permanently
-      removed.
-    </p>
-  </Modal>;
+  return (
+    <Modal
+      title="Delete chat"
+      description="Are you sure you want to delete this Chat? This action cannot be undone."
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      onSubmit={handleDelete}
+      submitText={isPending ? "Deleting.." : "Delete"}
+      submitVariant="destructive"
+    >
+      <p className="text-sm text-zinc-500">
+        Once deleted, all requests and data in this Chat will be permanently
+        removed.
+      </p>
+    </Modal>
+  );
 };
 
 export default DeleteChatModel;
