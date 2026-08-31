@@ -145,8 +145,6 @@ const ChatSidebar = ({ user }) => {
 
   const groupedChats = useMemo(() => {
     const result = groupChatsByDate(filteredChats);
-    console.log("Filtered chats:", filteredChats);
-    console.log("Grouped chats:", result);
     return result;
   }, [filteredChats]);
 
@@ -164,7 +162,7 @@ const ChatSidebar = ({ user }) => {
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
       <div className="flex items-center border-b border-sidebar-border px-4 py-3">
-        <Image src="/logo.svg" alt="logo" width={100} height={100} />
+        <Image src="/logo3.png" alt="logo" width={170} height={170} />
       </div>
 
       <div className="p-4">

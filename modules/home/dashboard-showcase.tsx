@@ -55,7 +55,7 @@ function Card({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/8 bg-white/[0.03] p-5",
+        "rounded-2xl border border-white/8 bg-white/3 p-5",
         className
       )}
     >
@@ -69,12 +69,12 @@ export function DashboardShowcase() {
     <section className="relative z-10 mx-auto -mt-13 max-w-6xl px-6 pb-24">
       <div
         className="
-      [mask-image:linear-gradient(to_bottom,black_10%,black_75%,transparent_100%)]
+      mask-[linear-gradient(to_bottom,black_40%,black_75%,transparent_100%)]
       [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_75%,transparent_100%)]
     "
       >
         <Image
-          src="/home2.png"
+          src="/home3.png"
           alt="home"
           width={1200}
           height={1000}

@@ -22,7 +22,7 @@ export function SiteNavbar() {
         <span className="font-heading text-lg font-bold tracking-wide text-white">
           T3-chat
         </span> */}
-        <Image src="./logo.svg" alt="logo" width={100} height={100}/>
+        <Image src="/logo3.png" alt="logo" width={170} height={170}/>
       </div>
 
       {/* Nav links */}

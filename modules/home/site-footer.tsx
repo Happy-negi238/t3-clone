@@ -11,7 +11,7 @@ export function SiteFooter() {
             <span className="w-1/2 bg-primary" />
             <span className="w-1/2 bg-white" />
           </span> */}
-          <Image src="./logo.svg" alt="logo" width={80} height={80} />
+          <Image src="/logo3.png" alt="logo" width={120} height={120} />
           {/* <span className="font-heading font-semibold text-white/80">
               T3 Chat
             </span>{" "} */}

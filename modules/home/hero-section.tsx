@@ -41,7 +41,7 @@ export function HeroSection() {
       {/* Orbit / globe grid lines */}
       <svg
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-6 h-120 w-255 -translate-x-1/2 opacity-25"
+        className="pointer-events-none absolute left-1/2 top-20 h-120 w-255 -translate-x-1/2 opacity-25"
         viewBox="0 0 920 480"
         fill="none"
       >
@@ -64,7 +64,7 @@ export function HeroSection() {
         </p>
         <Button
           size="lg"
-          className="mt-7 rounded-full bg-primary px-7 text-primary-foreground hover:bg-primary/90 disabled:bg-primary/80"
+          className="mt-7 rounded-full bg-primary px-7 text-primary-foreground hover:bg-primary/90"
           onClick={handleStartChatting}
           disabled={loading}
         >
